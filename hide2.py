@@ -19,21 +19,18 @@ async def mention_user_by_id(chat_id, user_id):
             # Fetch user details by user ID
             user = await app.get_users(user_id)
             
-            # Create the mention using user.mention() method (default is HTML)
-            mention_text = user.mention()  # Mention using the user's first name with HTML formatting
+            # Create the HTML mention using tg://user?id=USER_ID format
+            mention_text = f'<a href="tg://user?id={user.id}">{user.first_name}</a>'
             
-            # Or use Markdown style by passing style="md"
-            # mention_text = user.mention(style="md")
-
-            # Send the message with the mention
-            await app.send_message(chat_id, user.mention().maketrans())
+            # Send the message with HTML parse_mode to render the mention
+            await app.send_message(chat_id, f"Hello {mention_text}, this is a mention!", parse_mode="HTML")
 
             print(f"Successfully mentioned {user.first_name} in the chat.")
         except Exception as e:
             print(f"Error: {e}")
 
 # Replace with the user ID to mention
-user_id_to_mention = 6930730394  # Replace with actual user ID
+user_id_to_mention = 7432082684  # Replace with actual user ID
 
 # Replace with the chat ID where the message will be sent (use @username for channels/groups)
 chat_id = 6459990242  # Replace with actual chat ID
