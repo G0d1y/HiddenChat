@@ -37,6 +37,7 @@ async def start(client, message: Message):
                 "sender_id": message.from_user.id,
                 "recipient_id": owner_id,
                 "message_text": "",
+                "message_id": message.id,
                 "status": "pending",
                 "sender_username": message.from_user.username,
                 "sender_first_name": message.from_user.first_name,
@@ -58,6 +59,7 @@ async def view_message(client, message: Message):
             sender_username = msg["sender_username"]
             sender_first_name = msg["sender_first_name"]
             sender_last_name = msg["sender_last_name"]
+            message_id = msg["message_id"]
             message_text = msg["message_text"]
             keyboard = InlineKeyboardMarkup([[ 
                 InlineKeyboardButton("⛔️ بلاک", callback_data=f"block:{sender_id}"),
@@ -68,7 +70,7 @@ async def view_message(client, message: Message):
             else:
                 await message.reply(f"{message_text}", reply_markup=keyboard)
             messages_collection.update_one({"_id": msg["_id"]}, {"$set": {"status": "read"}})
-            await client.send_message(msg["sender_id"], "☝️ پیام شما توسط گیرنده دیده شد.")
+            await client.send_message(msg["sender_id"], "☝️ پیام شما توسط گیرنده دیده شد.", reply_to_message_id=message_id)
     else:
         await message.reply("No new messages.")
 
@@ -82,6 +84,7 @@ async def receive_message(client, message: Message):
         
         messages_collection.update_one({"_id": pending_msg["_id"]}, {"$set": {
             "message_text": message.text,
+            "message_id": message.id,
             "status": "unread",
             "sender_username": message.from_user.username,
             "sender_first_name": message.from_user.first_name,
@@ -90,7 +93,7 @@ async def receive_message(client, message: Message):
         
         await client.send_message(recipient_id, "📬 یه پیام ناشناس جدید داری ! \n\n جهت دریافت کلیک کنید 👈 /newmsg")
         
-        await message.reply("پیام شما ارسال شد 😊\n\nچه کاری برات انجام بدم؟")
+        await message.reply("پیام شما ارسال شد 😊\n\nچه کاری برات انجام بدم؟", reply_to_message_id=message.id)
 
 @app.on_callback_query(filters.regex("reply"))
 async def handle_reply(client, callback_query):
@@ -99,6 +102,7 @@ async def handle_reply(client, callback_query):
         "sender_id": callback_query.from_user.id,
         "recipient_id": sender_id,
         "message_text": "",
+        "message_id": callback_query.message.id,
         "status": "pending",
         "sender_username": callback_query.from_user.username,
         "sender_first_name": callback_query.from_user.first_name,
@@ -111,29 +115,6 @@ async def handle_block(client, callback_query):
     sender_id = int(callback_query.data.split(":")[1])
     messages_collection.delete_many({"recipient_id": callback_query.from_user.id, "sender_id": sender_id})
     await callback_query.message.reply("کاربر مسدود شد.")
-
-@app.on_message(filters.private)
-async def save_user_info(client, message: Message):
-    user_id = message.from_user.id
-    username = message.from_user.username if message.from_user.username else None
-    first_name = message.from_user.first_name if message.from_user.first_name else None
-    last_name = message.from_user.last_name if message.from_user.last_name else None
-
-    existing_user = users_collection.find_one({"user_id": user_id})
-    
-    if existing_user:
-        users_collection.update_one({"user_id": user_id}, {"$set": {
-            "username": username,
-            "first_name": first_name,
-            "last_name": last_name
-        }})
-    else:
-        users_collection.insert_one({
-            "user_id": user_id,
-            "username": username,
-            "first_name": first_name,
-            "last_name": last_name
-        })
 
 
 app.run()
