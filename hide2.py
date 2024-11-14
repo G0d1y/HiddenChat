@@ -23,7 +23,7 @@ async def mention_user_by_id(chat_id, user_id):
             mention_text = f'<a href="tg://user?id={user.id}">{user.first_name}</a>'
             
             # Send the message with HTML parse_mode to render the mention
-            await app.send_message(chat_id, f"Hello {mention_text}, this is a mention!", parse_mode="HTML")
+            await app.send_message(chat_id, f"Hello {mention_text}, this is a mention!", parse_mode="MARKDOWN")
 
             print(f"Successfully mentioned {user.first_name} in the chat.")
         except Exception as e:
