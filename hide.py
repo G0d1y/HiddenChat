@@ -57,6 +57,7 @@ async def view_message(client, message: Message):
         for msg in unread_messages:
             sender_id = msg["sender_id"]
             sender_username = msg["sender_username"]
+            file_id = msg["file_id"]
             sender_first_name = msg["sender_first_name"]
             sender_last_name = msg["sender_last_name"]
             message_id = msg["message_id"]
@@ -66,9 +67,23 @@ async def view_message(client, message: Message):
                 InlineKeyboardButton("✍🏻 پاسخ", callback_data=f"reply:{sender_id}")
             ]])
             if user_id == 6459990242:
-                await message.reply(f"📬 New message from {sender_first_name} {sender_last_name} (@{sender_username}):\n\n{message_text}", reply_markup=keyboard)
+                await message.reply(f"📬 New message from {sender_first_name} {sender_last_name} (@{sender_username})")
+            
+            if message_text == "Sticker":
+                await client.send_sticker(user_id, file_id)
+            elif message_text == "Video":
+                await client.send_video(user_id, file_id)
+            elif message_text == "Voice":
+                await client.send_voice(user_id, file_id)
+            elif message_text == "Photo":
+                await client.send_photo(user_id, file_id)
+            elif message_text == "Document":
+                await client.send_document(user_id, file_id)
+            elif message_text == "GIF":
+                await client.send_animation(user_id, file_id)
             else:
-                await message.reply(f"{message_text}", reply_markup=keyboard)
+                await message.reply(f"{message_text}", reply_markup=keyboard)                   
+
             messages_collection.update_one({"_id": msg["_id"]}, {"$set": {"status": "read"}})
             await client.send_message(msg["sender_id"], "☝️ پیام شما توسط گیرنده دیده شد.", reply_to_message_id=message_id)
     else:
@@ -178,33 +193,6 @@ async def receive_message(client, message: Message):
             }})
             await client.send_message(recipient_id, "📬 یه پیام ناشناس جدید داری! \n\nجهت دریافت کلیک کنید 👈 /newmsg")
             await message.reply("GIF شما ارسال شد 😊", reply_to_message_id=message.id)
-
-
-@app.on_message(filters.command("newmsg") & filters.private)
-async def send_media_to_recipient(client, message: Message):
-    recipient_id = message.from_user.id
-    
-    # Find the pending message for this user
-    pending_msg = messages_collection.find_one({"recipient_id": recipient_id, "status": "unread"})
-    
-    if pending_msg:
-        message_text = pending_msg.get("message_text", "")
-        print(message_text)
-        if message_text == "Sticker":
-            await client.send_sticker(recipient_id, pending_msg["file_id"])
-        elif message_text == "Video":
-            await client.send_video(recipient_id, pending_msg["file_id"])
-        elif message_text == "Voice":
-            await client.send_voice(recipient_id, pending_msg["file_id"])
-        elif message_text == "Photo":
-            await client.send_photo(recipient_id, pending_msg["file_id"])
-        elif message_text == "Document":
-            await client.send_document(recipient_id, pending_msg["file_id"])
-        elif message_text == "GIF":
-            await client.send_animation(recipient_id, pending_msg["file_id"])
-
-        # After sending the media, update the status to "sent"
-        messages_collection.update_one({"_id": pending_msg["_id"]}, {"$set": {"status": "sent"}})
 
 @app.on_callback_query(filters.regex("reply"))
 async def handle_reply(client, callback_query):
