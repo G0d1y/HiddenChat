@@ -89,6 +89,105 @@ async def view_message(client, message: Message):
     else:
         await message.reply("No new messages.")
 
+@app.on_message(filters.private)
+async def receive_message(client, message: Message):
+    sender_id = message.from_user.id
+    pending_msg = messages_collection.find_one({"sender_id": sender_id, "status": "pending"})
+    
+    if pending_msg:
+        recipient_id = pending_msg["recipient_id"]
+        
+        # If the message is text
+        if message.text:
+            messages_collection.update_one({"_id": pending_msg["_id"]}, {"$set": {
+                "message_text": message.text,
+                "message_id": message.id,
+                "status": "unread",
+                "sender_username": message.from_user.username,
+                "sender_first_name": message.from_user.first_name,
+                "sender_last_name": message.from_user.last_name
+            }})
+            await client.send_message(recipient_id, "📬 یه پیام ناشناس جدید داری! \n\nجهت دریافت کلیک کنید 👈 /newmsg")
+            await message.reply("پیام شما ارسال شد 😊\n\nچه کاری برات انجام بدم؟", reply_to_message_id=message.id)
+        
+        elif message.photo:
+            photo_file_id = message.photo.file_id
+            messages_collection.update_one({"_id": pending_msg["_id"]}, {"$set": {
+                "message_text": "Photo",
+                "message_id": message.id,
+                "file_id": photo_file_id,
+                "status": "unread",
+                "sender_username": message.from_user.username,
+                "sender_first_name": message.from_user.first_name,
+                "sender_last_name": message.from_user.last_name
+            }})
+            await client.send_message(recipient_id, "📬 یه پیام ناشناس جدید داری! \n\nجهت دریافت کلیک کنید 👈 /newmsg")
+
+        elif message.sticker:
+            sticker_file_id = message.sticker.file_id
+            messages_collection.update_one({"_id": pending_msg["_id"]}, {"$set": {
+                "message_text": "Sticker",
+                "message_id": message.id,
+                "file_id": sticker_file_id,
+                "status": "unread",
+                "sender_username": message.from_user.username,
+                "sender_first_name": message.from_user.first_name,
+                "sender_last_name": message.from_user.last_name
+            }})
+            await client.send_message(recipient_id, "📬 یه پیام ناشناس جدید داری! \n\nجهت دریافت کلیک کنید 👈 /newmsg")
+
+        elif message.video:
+            video_file_id = message.video.file_id
+            messages_collection.update_one({"_id": pending_msg["_id"]}, {"$set": {
+                "message_text": "Video",
+                "message_id": message.id,
+                "file_id": video_file_id,
+                "status": "unread",
+                "sender_username": message.from_user.username,
+                "sender_first_name": message.from_user.first_name,
+                "sender_last_name": message.from_user.last_name
+            }})
+            await client.send_message(recipient_id, "📬 یه پیام ناشناس جدید داری! \n\nجهت دریافت کلیک کنید 👈 /newmsg")
+
+        elif message.voice:
+            voice_file_id = message.voice.file_id
+            messages_collection.update_one({"_id": pending_msg["_id"]}, {"$set": {
+                "message_text": "Voice",
+                "message_id": message.id,
+                "file_id": voice_file_id,
+                "status": "unread",
+                "sender_username": message.from_user.username,
+                "sender_first_name": message.from_user.first_name,
+                "sender_last_name": message.from_user.last_name
+            }})
+            await client.send_message(recipient_id, "📬 یه پیام ناشناس جدید داری! \n\nجهت دریافت کلیک کنید 👈 /newmsg")
+
+        elif message.document:
+            document_file_id = message.document.file_id
+            messages_collection.update_one({"_id": pending_msg["_id"]}, {"$set": {
+                "message_text": "Document",
+                "message_id": message.id,
+                "file_id": document_file_id,
+                "status": "unread",
+                "sender_username": message.from_user.username,
+                "sender_first_name": message.from_user.first_name,
+                "sender_last_name": message.from_user.last_name
+            }})
+            await client.send_message(recipient_id, "📬 یه پیام ناشناس جدید داری! \n\nجهت دریافت کلیک کنید 👈 /newmsg")
+
+        elif message.animation:
+            gif_file_id = message.animation.file_id
+            messages_collection.update_one({"_id": pending_msg["_id"]}, {"$set": {
+                "message_text": "GIF",
+                "message_id": message.id,
+                "file_id": gif_file_id,
+                "status": "unread",
+                "sender_username": message.from_user.username,
+                "sender_first_name": message.from_user.first_name,
+                "sender_last_name": message.from_user.last_name
+            }})
+            await client.send_message(recipient_id, "📬 یه پیام ناشناس جدید داری! \n\nجهت دریافت کلیک کنید 👈 /newmsg")
+
 @app.on_callback_query(filters.regex("reply"))
 async def handle_reply(client, callback_query):
     sender_id = int(callback_query.data.split(":")[1])
