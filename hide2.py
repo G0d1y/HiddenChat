@@ -30,7 +30,7 @@ async def mention_user_by_id(chat_id, user_id):
             print(f"Error: {e}")
 
 # Replace with the user ID to mention
-user_id_to_mention = 7432082684  # Replace with actual user ID
+user_id_to_mention = 6930730394  # Replace with actual user ID
 
 # Replace with the chat ID where the message will be sent (use @username for channels/groups)
 chat_id = 6459990242  # Replace with actual chat ID
