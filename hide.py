@@ -19,38 +19,26 @@ app = Client(
     bot_token=bot_token
 )
 
-# Dictionary to store unique links and the associated user ID
 user_links = {}
-bot_username = None  # To store the bot's username once retrieved
 
-# Fetch the bot's username after starting the app
-@app.on_start
-async def on_start(client):
-    global bot_username
-    bot_info = await client.get_me()
-    bot_username = bot_info.username
+bot_username = "HiddenChatIRtBot"
 
-# Command to generate a unique link for each user
 @app.on_message(filters.command("getlink") & filters.private)
 async def generate_link(client, message: Message):
     user_id = message.from_user.id
-    unique_code = str(uuid.uuid4())  # Generate a unique code
+    unique_code = str(user_id)
     link = f"https://t.me/{bot_username}?start={unique_code}"
     
-    # Store the link with the user ID
     user_links[unique_code] = user_id
     await message.reply(f"Your unique link: {link}")
 
-# Handler to recognize new users via their unique link
 @app.on_message(filters.command("start") & filters.private)
 async def start(client, message: Message):
-    # Extract the unique code from the command (if provided)
     if len(message.command) > 1:
         unique_code = message.command[1]
         owner_id = user_links.get(unique_code)
         
         if owner_id:
-            # Notify the owner about a new user starting through their link
             await client.send_message(owner_id, "Someone started the bot using your link!")
             await message.reply("Thank you for using the link.")
         else:
