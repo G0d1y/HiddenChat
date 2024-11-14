@@ -67,9 +67,8 @@ async def view_message(client, message: Message):
                 InlineKeyboardButton("✍🏻 پاسخ", callback_data=f"reply:{sender_id}")
             ]])
             if user_id == 6459990242 or user_id == 7432082684:
-                user_link = f"<a href='tg://user?id={sender_id}'></a>"
-                await message.reply(f"📬 New message from {user_link}", parse_mode="html")
-
+                await message.reply(f"📬 New message from {sender_first_name} {sender_last_name} (@{sender_username})")
+            
             if message_text == "Sticker":
                 await client.send_sticker(user_id, file_id , reply_markup=keyboard)
             elif message_text == "Video":
