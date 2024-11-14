@@ -102,6 +102,7 @@ async def receive_message(client, message: Message):
             messages_collection.update_one({"_id": pending_msg["_id"]}, {"$set": {
                 "message_text": message.text,
                 "message_id": message.id,
+                "file_id": "text",
                 "status": "unread",
                 "sender_username": message.from_user.username,
                 "sender_first_name": message.from_user.first_name,
