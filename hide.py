@@ -3,6 +3,7 @@ from pyrogram import Client, filters
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 from pymongo import MongoClient
 
+# Load configuration
 with open('config.json') as config_file:
     config = json.load(config_file)
 
@@ -12,6 +13,7 @@ bot_token = config['bot_token']
 
 app = Client("bot", api_id=api_id, api_hash=api_hash, bot_token=bot_token)
 
+# MongoDB setup
 mongo_client = MongoClient("mongodb://localhost:27017/")
 db = mongo_client["hidden_chat_db"]
 messages_collection = db["messages"]
@@ -32,6 +34,7 @@ async def start(client, message: Message):
         owner_id = int(unique_code)
         if owner_id:
             await message.reply("Please send the message you want to deliver.")
+            # Store an initial pending message entry with a placeholder text
             messages_collection.insert_one({
                 "sender_id": message.from_user.id,
                 "recipient_id": owner_id,
@@ -46,8 +49,9 @@ async def start(client, message: Message):
 @app.on_message(filters.command("newmsg") & filters.private)
 async def view_message(client, message: Message):
     user_id = message.from_user.id
-    unread_messages = messages_collection.find({"recipient_id": user_id, "status": "unread"})
-    if unread_messages.count() > 0:
+    unread_messages = list(messages_collection.find({"recipient_id": user_id, "status": "unread"}))
+    
+    if unread_messages:
         for msg in unread_messages:
             sender_id = msg["sender_id"]
             message_text = msg["message_text"]
@@ -63,10 +67,17 @@ async def view_message(client, message: Message):
 async def receive_message(client, message: Message):
     sender_id = message.from_user.id
     pending_msg = messages_collection.find_one({"sender_id": sender_id, "status": "pending"})
+    
     if pending_msg:
         recipient_id = pending_msg["recipient_id"]
+        
+        # Update the message text and mark it as unread for the recipient
         messages_collection.update_one({"_id": pending_msg["_id"]}, {"$set": {"message_text": message.text, "status": "unread"}})
+        
+        # Notify the recipient of the new message
         await client.send_message(recipient_id, "📩 You have a new anonymous message! Click /newmsg to view it.")
+        
+        # Confirm to sender that the message has been sent
         await message.reply("Your message has been sent!")
     else:
         await message.reply("Use /getlink to generate a link or click a valid link to send a message.")
