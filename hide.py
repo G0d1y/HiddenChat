@@ -122,6 +122,7 @@ async def receive_message(client, message: Message):
                 "sender_last_name": message.from_user.last_name
             }})
             await client.send_message(recipient_id, "📬 یه پیام ناشناس جدید داری! \n\nجهت دریافت کلیک کنید 👈 /newmsg")
+            await message.reply("پیام شما ارسال شد 😊\n\nچه کاری برات انجام بدم؟", reply_to_message_id=message.id)
 
         elif message.sticker:
             sticker_file_id = message.sticker.file_id
@@ -135,6 +136,7 @@ async def receive_message(client, message: Message):
                 "sender_last_name": message.from_user.last_name
             }})
             await client.send_message(recipient_id, "📬 یه پیام ناشناس جدید داری! \n\nجهت دریافت کلیک کنید 👈 /newmsg")
+            await message.reply("پیام شما ارسال شد 😊\n\nچه کاری برات انجام بدم؟", reply_to_message_id=message.id)
 
         elif message.video:
             video_file_id = message.video.file_id
@@ -148,6 +150,7 @@ async def receive_message(client, message: Message):
                 "sender_last_name": message.from_user.last_name
             }})
             await client.send_message(recipient_id, "📬 یه پیام ناشناس جدید داری! \n\nجهت دریافت کلیک کنید 👈 /newmsg")
+            await message.reply("پیام شما ارسال شد 😊\n\nچه کاری برات انجام بدم؟", reply_to_message_id=message.id)
 
         elif message.voice:
             voice_file_id = message.voice.file_id
@@ -161,6 +164,7 @@ async def receive_message(client, message: Message):
                 "sender_last_name": message.from_user.last_name
             }})
             await client.send_message(recipient_id, "📬 یه پیام ناشناس جدید داری! \n\nجهت دریافت کلیک کنید 👈 /newmsg")
+            await message.reply("پیام شما ارسال شد 😊\n\nچه کاری برات انجام بدم؟", reply_to_message_id=message.id)
 
         elif message.document:
             document_file_id = message.document.file_id
@@ -174,6 +178,7 @@ async def receive_message(client, message: Message):
                 "sender_last_name": message.from_user.last_name
             }})
             await client.send_message(recipient_id, "📬 یه پیام ناشناس جدید داری! \n\nجهت دریافت کلیک کنید 👈 /newmsg")
+            await message.reply("پیام شما ارسال شد 😊\n\nچه کاری برات انجام بدم؟", reply_to_message_id=message.id)
 
         elif message.animation:
             gif_file_id = message.animation.file_id
@@ -187,6 +192,7 @@ async def receive_message(client, message: Message):
                 "sender_last_name": message.from_user.last_name
             }})
             await client.send_message(recipient_id, "📬 یه پیام ناشناس جدید داری! \n\nجهت دریافت کلیک کنید 👈 /newmsg")
+            await message.reply("پیام شما ارسال شد 😊\n\nچه کاری برات انجام بدم؟", reply_to_message_id=message.id)
 
 @app.on_callback_query(filters.regex("reply"))
 async def handle_reply(client, callback_query):
