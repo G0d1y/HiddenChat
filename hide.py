@@ -19,6 +19,7 @@ app = Client(
 user_links = {}
 pending_messages = {}
 user_messages = {}
+reply_to_user = {}
 
 bot_username = "HiddenChatIRtBot"
 
@@ -76,14 +77,22 @@ async def receive_message(client, message: Message):
         await message.reply("Your message has been sent!")
         
         del pending_messages[sender_id]
+    elif sender_id in reply_to_user:
+        recipient_id = reply_to_user[sender_id]
+        
+        await client.send_message(recipient_id, f"📬 Reply from user:\n\n{message.text}")
+        
+        await message.reply("Your reply has been sent!")
+        
+        del reply_to_user[sender_id]
     else:
         await message.reply("Use /getlink to generate a link or click a valid link to send a message.")
 
 @app.on_callback_query(filters.regex("reply"))
 async def handle_reply(client, callback_query):
     user_id = int(callback_query.data.split(":")[1])
+    reply_to_user[callback_query.from_user.id] = user_id
     await callback_query.message.reply("Please type your reply.")
-    pending_messages[callback_query.from_user.id] = user_id
 
 @app.on_callback_query(filters.regex("block"))
 async def handle_block(client, callback_query):
