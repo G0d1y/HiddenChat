@@ -189,7 +189,7 @@ async def send_media_to_recipient(client, message: Message):
     
     if pending_msg:
         message_text = pending_msg.get("message_text", "")
-        
+        print(message_text)
         if message_text == "Sticker":
             await client.send_sticker(recipient_id, pending_msg["file_id"])
         elif message_text == "Video":
@@ -205,6 +205,7 @@ async def send_media_to_recipient(client, message: Message):
 
         # After sending the media, update the status to "sent"
         messages_collection.update_one({"_id": pending_msg["_id"]}, {"$set": {"status": "sent"}})
+
 @app.on_callback_query(filters.regex("reply"))
 async def handle_reply(client, callback_query):
     sender_id = int(callback_query.data.split(":")[1])
