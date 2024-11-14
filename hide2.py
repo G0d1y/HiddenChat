@@ -1,7 +1,6 @@
 import json
 from pyrogram import Client
 from pyrogram.types import Message
-from pymongo import MongoClient
 
 # Load config from config.json
 with open('config.json') as config_file:
@@ -20,21 +19,21 @@ async def mention_user_by_id(chat_id, user_id):
             # Fetch user details by user ID
             user = await app.get_users(user_id)
             
-            # Format the mention text correctly
+            # Create the mention using Markdown format
             mention_text = f"[{user.first_name}](tg://user?id={user.id})"
             
             # Send the message with the mention
-            await app.send_message(chat_id, f"Hello {mention_text}, this is a mention!")
-            
+            await app.send_message(chat_id, f"Hello {mention_text}, this is a mention!", parse_mode="Markdown")
+
             print(f"Successfully mentioned {user.first_name} in the chat.")
         except Exception as e:
             print(f"Error: {e}")
 
-# User ID to mention (replace with the actual user ID)
-user_id_to_mention = 6930730394
+# Replace with the user ID to mention
+user_id_to_mention = 6930730394  # Replace with actual user ID
 
-# Chat ID where the mention will be sent (replace with the actual chat ID)
-chat_id = 6459990242
+# Replace with the chat ID where the message will be sent (use @username for channels/groups)
+chat_id = 6459990242  # Replace with actual chat ID
 
 # Run the bot and mention the user
 app.run(mention_user_by_id(chat_id, user_id_to_mention))
