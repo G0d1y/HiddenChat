@@ -2,6 +2,7 @@ import json
 from pyrogram import Client, filters
 from pyrogram.types import Message
 
+# Load bot configuration
 with open('config.json') as config_file:
     config = json.load(config_file)
 
@@ -16,51 +17,65 @@ app = Client(
     bot_token=bot_token
 )
 
+# Dictionary to store unique links and the associated user ID and messages
 user_links = {}
 user_messages = {}
 
+# Bot username
 bot_username = "HiddenChatIRtBot"
 
+# Command to generate a unique link for each user
 @app.on_message(filters.command("getlink") & filters.private)
 async def generate_link(client, message: Message):
     user_id = message.from_user.id
-    unique_code = str(user_id)
+    unique_code = str(user_id)  # Use user ID as a unique code
     link = f"https://t.me/{bot_username}?start={unique_code}"
     
+    # Store the link with the user ID
     user_links[unique_code] = user_id
     await message.reply(f"Your unique link: {link}")
 
+# Handler to recognize new users via their unique link
 @app.on_message(filters.command("start") & filters.private)
 async def start(client, message: Message):
+    # Extract the unique code from the command (if provided)
     if len(message.command) > 1:
         unique_code = message.command[1]
         owner_id = user_links.get(unique_code)
         
         if owner_id:
-            await client.send_message(owner_id, "📩 شما یک پیام ناشناس جدید دارید!\nجهت دریافت کلیک کنید 👉 /newmsg")
-            await message.reply("Thank you for using the link.")
+            # Notify the owner about a new anonymous message
+            await client.send_message(owner_id, "📩 شما یک پیام ناشناس جدید دارید!\nجهت دریافت پیام کلیک کنید 👉 /newmsg")
+            await message.reply("Thank you for using the link. Send your message now.")
             
+            # Store the message sender's ID for the owner
             user_messages[owner_id] = message.from_user.id
         else:
             await message.reply("Invalid or expired link.")
     else:
         await message.reply("Welcome to the bot! Use /getlink to generate your unique link.")
 
+# Command for the owner to view the new message
 @app.on_message(filters.command("newmsg") & filters.private)
 async def view_message(client, message: Message):
     user_id = message.from_user.id
     sender_id = user_messages.get(user_id)
     
     if sender_id:
+        # Notify the owner that the message is now visible
         await message.reply("پیام شما ارسال شد 😊\nچه کاری برات انجام بدم؟\n\nجهت ارسال پیام دوباره به این شخص دستور /again را لمس کنید.")
-        del user_messages[user_id] 
+        del user_messages[user_id]  # Clear the message after viewing
+    else:
+        await message.reply("هیچ پیام جدیدی برای نمایش یافت نشد.")
 
+# Command to send another message to the last sender
 @app.on_message(filters.command("again") & filters.private)
 async def send_again(client, message: Message):
     user_id = message.from_user.id
     sender_id = user_messages.get(user_id)
     
     if sender_id:
+        # Send a message back to the anonymous user
         await client.send_message(sender_id, "این پیامت ✌️ رو دیدم!")
         await message.reply("پیام شما ارسال شد 😊\nچه کاری برات انجام بدم؟")
     else:
