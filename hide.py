@@ -51,6 +51,19 @@ async def start(client, message: Message):
     else:
         await message.reply("Welcome to the bot! Use /getlink to generate your unique link.")
 
+@app.on_message(filters.command("newmsg") & filters.private)
+async def view_message(client, message: Message):
+    user_id = message.from_user.id
+    
+    # Check if there is a new message for the user
+    if user_id in user_messages:
+        await message.reply(f"📬 New message:\n\n{user_messages[user_id]}")
+        
+        # Remove the message after it is read
+        del user_messages[user_id]
+    else:
+        await message.reply("No new messages.")
+        
 @app.on_message(filters.text & filters.private)
 async def receive_message(client, message: Message):
     sender_id = message.from_user.id
@@ -71,17 +84,6 @@ async def receive_message(client, message: Message):
     else:
         await message.reply("Use /getlink to generate a link or click a valid link to send a message.")
 
-@app.on_message(filters.command("newmsg") & filters.private)
-async def view_message(client, message: Message):
-    user_id = message.from_user.id
-    
-    # Check if there is a new message for the user
-    if user_id in user_messages:
-        await message.reply(f"📬 New message:\n\n{user_messages[user_id]}")
-        
-        # Remove the message after it is read
-        del user_messages[user_id]
-    else:
-        await message.reply("No new messages.")
+
 
 app.run()
