@@ -32,7 +32,7 @@ async def start(client, message: Message):
         unique_code = message.command[1]
         owner_id = int(unique_code)
         if message.from_user.id == owner_id:
-            message.reply("اینکه آدم گاهی با خودش حرف بزنه خوبه ، ولی اینجا نمیتونی به خودت پیام ناشناس بفرستی ! :) \n\n چه کاری برات انجام بدم؟")
+            await message.reply("اینکه آدم گاهی با خودش حرف بزنه خوبه ، ولی اینجا نمیتونی به خودت پیام ناشناس بفرستی ! :) \n\n چه کاری برات انجام بدم؟")
             return
 
         if owner_id:
