@@ -19,11 +19,11 @@ async def mention_user_by_id(chat_id, user_id):
             # Fetch user details by user ID
             user = await app.get_users(user_id)
             
-            # Create the mention using Markdown format
+            # Create the mention using MarkdownV2 format
             mention_text = f"[{user.first_name}](tg://user?id={user.id})"
             
             # Send the message with the mention
-            await app.send_message(chat_id, f"Hello {mention_text}, this is a mention!", parse_mode="Markdown")
+            await app.send_message(chat_id, f"Hello {mention_text}, this is a mention!", parse_mode="MarkdownV2")
 
             print(f"Successfully mentioned {user.first_name} in the chat.")
         except Exception as e:
