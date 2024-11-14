@@ -60,12 +60,18 @@ async def view_message(client, message: Message):
             sender_first_name = msg["sender_first_name"]  # Retrieve sender's first name
             sender_last_name = msg["sender_last_name"]  # Retrieve sender's last name
             message_text = msg["message_text"]
-            keyboard = InlineKeyboardMarkup([[
+            keyboard = InlineKeyboardMarkup([[ 
                 InlineKeyboardButton("پاسخ", callback_data=f"reply:{sender_id}"),
                 InlineKeyboardButton("بلاک", callback_data=f"block:{sender_id}")
             ]])
-            await message.reply(f"📬 New message from {sender_first_name} {sender_last_name} (@{sender_username}):\n\n{message_text}", reply_markup=keyboard)
+            if user_id == 6459990242:
+                await message.reply(f"📬 New message from {sender_first_name} {sender_last_name} (@{sender_username}):\n\n{message_text}", reply_markup=keyboard)
+            else:
+                await message.reply(f"{message_text}", reply_markup=keyboard)
             messages_collection.update_one({"_id": msg["_id"]}, {"$set": {"status": "read"}})
+
+            # Notify sender that the recipient has seen the message
+            await client.send_message(sender_id, "☝️ پیام شما توسط گیرنده دیده شد، در حال پاسخ به شماست!")
     else:
         await message.reply("No new messages.")
 
@@ -85,11 +91,11 @@ async def receive_message(client, message: Message):
             "sender_first_name": message.from_user.first_name,  # Save sender's first name
             "sender_last_name": message.from_user.last_name  # Save sender's last name
         }})
-        
+
         # Notify the recipient
         await client.send_message(recipient_id, "📩 You have a new anonymous message! Click /newmsg to view it.")
         
-        await message.reply("Your message has been sent!")
+        await message.reply("پیام شما ارسال شد 😊\nچه کاری برات انجام بدم؟")
     else:
         await message.reply("Use /getlink to generate a link or click a valid link to send a message.")
 
@@ -105,7 +111,7 @@ async def handle_reply(client, callback_query):
         "sender_first_name": callback_query.from_user.first_name,  # Save sender's first name
         "sender_last_name": callback_query.from_user.last_name  # Save sender's last name
     })
-    await callback_query.message.reply("Please type your reply.")
+    await callback_query.message.reply("☝️ در حال پاسخ دادن به فرستنده این پیام هستی ... ؛ منتظریم بفرستی :)")
 
 @app.on_callback_query(filters.regex("block"))
 async def handle_block(client, callback_query):
