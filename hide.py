@@ -82,7 +82,7 @@ async def receive_message(client, message: Message):
     if pending_msg:
         recipient_id = pending_msg["recipient_id"]
         
-        # Update the database with the incoming message
+        # If the message is text
         if message.text:
             messages_collection.update_one({"_id": pending_msg["_id"]}, {"$set": {
                 "message_text": message.text,
@@ -95,50 +95,12 @@ async def receive_message(client, message: Message):
             await client.send_message(recipient_id, "📬 یه پیام ناشناس جدید داری! \n\nجهت دریافت کلیک کنید 👈 /newmsg")
             await message.reply("پیام شما ارسال شد 😊\n\nچه کاری برات انجام بدم؟", reply_to_message_id=message.id)
         
-        elif message.sticker:
-            sticker_file_id = message.sticker.file_id
-            messages_collection.update_one({"_id": pending_msg["_id"]}, {"$set": {
-                "message_text": "Sticker",  # Customize if needed
-                "message_id": message.id,
-                "status": "unread",
-                "sender_username": message.from_user.username,
-                "sender_first_name": message.from_user.first_name,
-                "sender_last_name": message.from_user.last_name
-            }})
-            await client.send_message(recipient_id, "📬 یه پیام ناشناس جدید داری! \n\nجهت دریافت کلیک کنید 👈 /newmsg")
-            await message.reply("Sticker شما ارسال شد 😊", reply_to_message_id=message.id)
-        
-        elif message.video:
-            video_file_id = message.video.file_id
-            messages_collection.update_one({"_id": pending_msg["_id"]}, {"$set": {
-                "message_text": "Video",  # Customize if needed
-                "message_id": message.id,
-                "status": "unread",
-                "sender_username": message.from_user.username,
-                "sender_first_name": message.from_user.first_name,
-                "sender_last_name": message.from_user.last_name
-            }})
-            await client.send_message(recipient_id, "📬 یه پیام ناشناس جدید داری! \n\nجهت دریافت کلیک کنید 👈 /newmsg")
-            await message.reply("Video شما ارسال شد 😊", reply_to_message_id=message.id)
-        
-        elif message.voice:
-            voice_file_id = message.voice.file_id
-            messages_collection.update_one({"_id": pending_msg["_id"]}, {"$set": {
-                "message_text": "Voice",  # Customize if needed
-                "message_id": message.id,
-                "status": "unread",
-                "sender_username": message.from_user.username,
-                "sender_first_name": message.from_user.first_name,
-                "sender_last_name": message.from_user.last_name
-            }})
-            await client.send_message(recipient_id, "📬 یه پیام ناشناس جدید داری! \n\nجهت دریافت کلیک کنید 👈 /newmsg")
-            await message.reply("Voice شما ارسال شد 😊", reply_to_message_id=message.id)
-        
+        # If the message is a photo
         elif message.photo:
             photo_file_id = message.photo.file_id
             messages_collection.update_one({"_id": pending_msg["_id"]}, {"$set": {
-                "message_text": "Photo",  # Customize if needed
-                "message_id": message.id,
+                "message_text": "Photo",  # Just a label for easy identification, but you should use the file_id
+                "message_id": photo_file_id,  # Save the file_id of the photo
                 "status": "unread",
                 "sender_username": message.from_user.username,
                 "sender_first_name": message.from_user.first_name,
@@ -146,12 +108,55 @@ async def receive_message(client, message: Message):
             }})
             await client.send_message(recipient_id, "📬 یه پیام ناشناس جدید داری! \n\nجهت دریافت کلیک کنید 👈 /newmsg")
             await message.reply("Photo شما ارسال شد 😊", reply_to_message_id=message.id)
-        
+
+        # If the message is a sticker
+        elif message.sticker:
+            sticker_file_id = message.sticker.file_id
+            messages_collection.update_one({"_id": pending_msg["_id"]}, {"$set": {
+                "message_text": "Sticker",  # Label for easy identification
+                "message_id": sticker_file_id,  # Save the file_id of the sticker
+                "status": "unread",
+                "sender_username": message.from_user.username,
+                "sender_first_name": message.from_user.first_name,
+                "sender_last_name": message.from_user.last_name
+            }})
+            await client.send_message(recipient_id, "📬 یه پیام ناشناس جدید داری! \n\nجهت دریافت کلیک کنید 👈 /newmsg")
+            await message.reply("Sticker شما ارسال شد 😊", reply_to_message_id=message.id)
+
+        # If the message is a video
+        elif message.video:
+            video_file_id = message.video.file_id
+            messages_collection.update_one({"_id": pending_msg["_id"]}, {"$set": {
+                "message_text": "Video",  # Label for easy identification
+                "message_id": video_file_id,  # Save the file_id of the video
+                "status": "unread",
+                "sender_username": message.from_user.username,
+                "sender_first_name": message.from_user.first_name,
+                "sender_last_name": message.from_user.last_name
+            }})
+            await client.send_message(recipient_id, "📬 یه پیام ناشناس جدید داری! \n\nجهت دریافت کلیک کنید 👈 /newmsg")
+            await message.reply("Video شما ارسال شد 😊", reply_to_message_id=message.id)
+
+        # If the message is a voice
+        elif message.voice:
+            voice_file_id = message.voice.file_id
+            messages_collection.update_one({"_id": pending_msg["_id"]}, {"$set": {
+                "message_text": "Voice",  # Label for easy identification
+                "message_id": voice_file_id,  # Save the file_id of the voice message
+                "status": "unread",
+                "sender_username": message.from_user.username,
+                "sender_first_name": message.from_user.first_name,
+                "sender_last_name": message.from_user.last_name
+            }})
+            await client.send_message(recipient_id, "📬 یه پیام ناشناس جدید داری! \n\nجهت دریافت کلیک کنید 👈 /newmsg")
+            await message.reply("Voice شما ارسال شد 😊", reply_to_message_id=message.id)
+
+        # If the message is a document
         elif message.document:
             document_file_id = message.document.file_id
             messages_collection.update_one({"_id": pending_msg["_id"]}, {"$set": {
-                "message_text": "Document",  # Customize if needed
-                "message_id": message.id,
+                "message_text": "Document",  # Label for easy identification
+                "message_id": document_file_id,  # Save the file_id of the document
                 "status": "unread",
                 "sender_username": message.from_user.username,
                 "sender_first_name": message.from_user.first_name,
@@ -160,11 +165,12 @@ async def receive_message(client, message: Message):
             await client.send_message(recipient_id, "📬 یه پیام ناشناس جدید داری! \n\nجهت دریافت کلیک کنید 👈 /newmsg")
             await message.reply("Document شما ارسال شد 😊", reply_to_message_id=message.id)
 
-        elif message.animation:  # For GIF
+        # If the message is a GIF (animation)
+        elif message.animation:
             gif_file_id = message.animation.file_id
             messages_collection.update_one({"_id": pending_msg["_id"]}, {"$set": {
-                "message_text": "GIF",  # Customize if needed
-                "message_id": message.id,
+                "message_text": "GIF",  # Label for easy identification
+                "message_id": gif_file_id,  # Save the file_id of the GIF
                 "status": "unread",
                 "sender_username": message.from_user.username,
                 "sender_first_name": message.from_user.first_name,
@@ -185,17 +191,17 @@ async def send_media_to_recipient(client, message: Message):
         message_text = pending_msg.get("message_text", "")
         
         if message_text == "Sticker":
-            await client.send_sticker(recipient_id, pending_msg["message_id"])  # Use the correct file ID
+            await client.send_sticker(recipient_id, pending_msg["message_id"])  # Use the correct file_id
         elif message_text == "Video":
-            await client.send_video(recipient_id, pending_msg["message_id"])  # Use the correct file ID
+            await client.send_video(recipient_id, pending_msg["message_id"])  # Use the correct file_id
         elif message_text == "Voice":
-            await client.send_voice(recipient_id, pending_msg["message_id"])  # Use the correct file ID
+            await client.send_voice(recipient_id, pending_msg["message_id"])  # Use the correct file_id
         elif message_text == "Photo":
-            await client.send_photo(recipient_id, pending_msg["message_id"])  # Use the correct file ID
+            await client.send_photo(recipient_id, pending_msg["message_id"])  # Use the correct file_id
         elif message_text == "Document":
-            await client.send_document(recipient_id, pending_msg["message_id"])  # Use the correct file ID
+            await client.send_document(recipient_id, pending_msg["message_id"])  # Use the correct file_id
         elif message_text == "GIF":
-            await client.send_animation(recipient_id, pending_msg["message_id"])  # Use the correct file ID
+            await client.send_animation(recipient_id, pending_msg["message_id"])  # Use the correct file_id
 
         # After sending the media, update the status to "sent"
         messages_collection.update_one({"_id": pending_msg["_id"]}, {"$set": {"status": "sent"}})
