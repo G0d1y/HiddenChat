@@ -73,6 +73,7 @@ async def receive_message(client, message: Message):
         
         await client.send_message(recipient_id, "📩 You have a new anonymous message! Click /newmsg to view it.")
         
+        # Store the message for the recipient (User 2) in the user_messages dictionary
         user_messages[recipient_id] = message.text
         await message.reply("Your message has been sent!")
         
