@@ -14,7 +14,7 @@ bot_token = config['bot_token']
 app = Client("bot", api_id=api_id, api_hash=api_hash, bot_token=bot_token)
 
 # MongoDB setup
-mongo_client = MongoClient("mongodb://localhost:27017/")
+mongo_client = MongoClient("mongodb+srv://mg:mani2244@cluster0.mmtvzb3.mongodb.net/")
 db = mongo_client["hidden_chat_db"]
 messages_collection = db["messages"]
 
