@@ -1,10 +1,7 @@
-import os
 import json
-import uuid  # To generate unique link codes
 from pyrogram import Client, filters
 from pyrogram.types import Message
 
-# Load bot configuration
 with open('config.json') as config_file:
     config = json.load(config_file)
 
@@ -20,6 +17,7 @@ app = Client(
 )
 
 user_links = {}
+user_messages = {}
 
 bot_username = "HiddenChatIRtBot"
 
@@ -39,30 +37,33 @@ async def start(client, message: Message):
         owner_id = user_links.get(unique_code)
         
         if owner_id:
-            await client.send_message(owner_id, "Someone started the bot using your link!")
+            await client.send_message(owner_id, "📩 شما یک پیام ناشناس جدید دارید!\nجهت دریافت کلیک کنید 👉 /newmsg")
             await message.reply("Thank you for using the link.")
+            
+            user_messages[owner_id] = message.from_user.id
         else:
             await message.reply("Invalid or expired link.")
     else:
         await message.reply("Welcome to the bot! Use /getlink to generate your unique link.")
 
-# When someone sends a message, notify the owner
-@app.on_message(filters.text & filters.private)
-async def forward_message_to_owner(client, message: Message):
-    # Check if the sender used a unique link
-    for unique_code, owner_id in user_links.items():
-        if owner_id == message.from_user.id:
-            await client.send_message(
-                owner_id,
-                f"You received a message:\n\n{message.text}\n\nUse /newmsg to view it."
-            )
-            break
-
-# Command for the owner to view the message
 @app.on_message(filters.command("newmsg") & filters.private)
 async def view_message(client, message: Message):
     user_id = message.from_user.id
-    # Here you would retrieve the message and show it to the user
-    await message.reply("Here is your new message from your unique link!")
+    sender_id = user_messages.get(user_id)
+    
+    if sender_id:
+        await message.reply("پیام شما ارسال شد 😊\nچه کاری برات انجام بدم؟\n\nجهت ارسال پیام دوباره به این شخص دستور /again را لمس کنید.")
+        del user_messages[user_id] 
+
+@app.on_message(filters.command("again") & filters.private)
+async def send_again(client, message: Message):
+    user_id = message.from_user.id
+    sender_id = user_messages.get(user_id)
+    
+    if sender_id:
+        await client.send_message(sender_id, "این پیامت ✌️ رو دیدم!")
+        await message.reply("پیام شما ارسال شد 😊\nچه کاری برات انجام بدم؟")
+    else:
+        await message.reply("هیچ پیامی برای ارسال دوباره یافت نشد.")
 
 app.run()
