@@ -31,6 +31,9 @@ async def start(client, message: Message):
     if len(message.command) > 1:
         unique_code = message.command[1]
         owner_id = int(unique_code)
+        if message.from_user.id == owner_id:
+            return
+
         if owner_id:
             await message.reply("لطفا پیامی که میخواهید ارسال کنید رو وارد کنید.")
             messages_collection.insert_one({
