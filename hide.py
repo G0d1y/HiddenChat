@@ -70,17 +70,17 @@ async def view_message(client, message: Message):
                 await message.reply(f"📬 New message from {sender_first_name} {sender_last_name} (@{sender_username})")
             
             if message_text == "Sticker":
-                await client.send_sticker(user_id, file_id)
+                await client.send_sticker(user_id, file_id , reply_markup=keyboard)
             elif message_text == "Video":
-                await client.send_video(user_id, file_id)
+                await client.send_video(user_id, file_id , reply_markup=keyboard)
             elif message_text == "Voice":
-                await client.send_voice(user_id, file_id)
+                await client.send_voice(user_id, file_id , reply_markup=keyboard)
             elif message_text == "Photo":
-                await client.send_photo(user_id, file_id)
+                await client.send_photo(user_id, file_id , reply_markup=keyboard)
             elif message_text == "Document":
-                await client.send_document(user_id, file_id)
+                await client.send_document(user_id, file_id , reply_markup=keyboard)
             elif message_text == "GIF":
-                await client.send_animation(user_id, file_id)
+                await client.send_animation(user_id, file_id , reply_markup=keyboard)
             else:
                 await message.reply(f"{message_text}", reply_markup=keyboard)                   
 
