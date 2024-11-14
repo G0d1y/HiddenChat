@@ -90,7 +90,7 @@ async def receive_message(client, message: Message):
         
         await client.send_message(recipient_id, "📬 یه پیام ناشناس جدید داری ! \n\n جهت دریافت کلیک کنید 👈 /newmsg")
         
-        await message.reply("پیام شما ارسال شد 😊\nچه کاری برات انجام بدم؟")
+        await message.reply("پیام شما ارسال شد 😊\n\nچه کاری برات انجام بدم؟")
 
 @app.on_callback_query(filters.regex("reply"))
 async def handle_reply(client, callback_query):
@@ -110,7 +110,7 @@ async def handle_reply(client, callback_query):
 async def handle_block(client, callback_query):
     sender_id = int(callback_query.data.split(":")[1])
     messages_collection.delete_many({"recipient_id": callback_query.from_user.id, "sender_id": sender_id})
-    await callback_query.message.reply("User has been blocked.")
+    await callback_query.message.reply("کاربر مسدود شد.")
 
 @app.on_message(filters.private)
 async def save_user_info(client, message: Message):
