@@ -12,17 +12,20 @@ bot_token = config['bot_token']
 
 app = Client("hide2", api_id=api_id, api_hash=api_hash, bot_token=bot_token)
 
-async def find_user_by_id(user_id):
+async def mention_user_by_id(chat_id, user_id):
     async with app:
         try:
             user = await app.get_users(user_id)
-            print(f"User found: {user.first_name} {user.last_name}")
-            print(f"Username: {user.username}")
-            print(f"User ID: {user.id}")
+            
+            mention_text = f"[{user.first_name}](tg://user?id={user.id})"
+            
+            await app.send_message(chat_id, f"Hello {mention_text}, this is a mention!")
+
+            print(f"Successfully mentioned {user.first_name} in the chat.")
         except Exception as e:
             print(f"Error: {e}")
 
-user_id_to_find = 6930730394
+user_id_to_mention = 6930730394
+chat_id = 6459990242
 
-# Call the function
-app.run(find_user_by_id(user_id_to_find))
+app.run(mention_user_by_id(chat_id, user_id_to_mention))
