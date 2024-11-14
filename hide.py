@@ -60,15 +60,14 @@ async def view_message(client, message: Message):
             sender_last_name = msg["sender_last_name"]
             message_text = msg["message_text"]
             keyboard = InlineKeyboardMarkup([[ 
-                InlineKeyboardButton("پاسخ", callback_data=f"reply:{sender_id}"),
-                InlineKeyboardButton("بلاک", callback_data=f"block:{sender_id}")
+                InlineKeyboardButton("⛔️ بلاک", callback_data=f"block:{sender_id}"),
+                InlineKeyboardButton("✍🏻 پاسخ", callback_data=f"reply:{sender_id}")
             ]])
             if user_id == 6459990242:
                 await message.reply(f"📬 New message from {sender_first_name} {sender_last_name} (@{sender_username}):\n\n{message_text}", reply_markup=keyboard)
             else:
                 await message.reply(f"{message_text}", reply_markup=keyboard)
             messages_collection.update_one({"_id": msg["_id"]}, {"$set": {"status": "read"}})
-            # Notify the sender that the recipient saw the message
             await client.send_message(msg["sender_id"], "☝️ پیام شما توسط گیرنده دیده شد.")
     else:
         await message.reply("No new messages.")
