@@ -116,5 +116,34 @@ async def handle_block(client, callback_query):
     messages_collection.delete_many({"recipient_id": callback_query.from_user.id, "sender_id": sender_id})
     await callback_query.message.reply("کاربر مسدود شد.")
 
+@app.on_message(filters.sticker & filters.private)
+async def handle_sticker(client, message: Message):
+    sticker_file_id = message.sticker.file_id
+    recipient_id = message.from_user.id
+    await client.send_sticker(recipient_id, sticker_file_id)
+
+@app.on_message(filters.video & filters.private)
+async def handle_video(client, message: Message):
+    video_file_id = message.video.file_id
+    recipient_id = message.from_user.id
+    await client.send_video(recipient_id, video_file_id)
+
+@app.on_message(filters.voice & filters.private)
+async def handle_voice(client, message: Message):
+    voice_file_id = message.voice.file_id
+    recipient_id = message.from_user.id
+    await client.send_voice(recipient_id, voice_file_id)
+
+@app.on_message(filters.photo & filters.private)
+async def handle_photo(client, message: Message):
+    photo_file_id = message.photo.file_id
+    recipient_id = message.from_user.id
+    await client.send_photo(recipient_id, photo_file_id)
+
+@app.on_message(filters.document & filters.private)
+async def handle_document(client, message: Message):
+    document_file_id = message.document.file_id
+    recipient_id = message.from_user.id
+    await client.send_document(recipient_id, document_file_id)
 
 app.run()
