@@ -26,7 +26,7 @@ async def mention_user_by_id(chat_id, user_id):
             # mention_text = user.mention(style="md")
 
             # Send the message with the mention
-            await app.send_message(chat_id, user)
+            await app.send_message(chat_id, user.mention)
 
             print(f"Successfully mentioned {user.first_name} in the chat.")
         except Exception as e:
