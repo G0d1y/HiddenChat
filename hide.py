@@ -13,10 +13,10 @@ bot_token = config['bot_token']
 
 app = Client("bot", api_id=api_id, api_hash=api_hash, bot_token=bot_token)
 
-# MongoDB setup
 mongo_client = MongoClient("mongodb+srv://mg:mani2244@cluster0.mmtvzb3.mongodb.net/")
 db = mongo_client["hidden_chat_db"]
 messages_collection = db["messages"]
+users_collection = db["users"]
 
 bot_username = "HiddenChatIRtBot"
 
@@ -34,7 +34,6 @@ async def start(client, message: Message):
         owner_id = int(unique_code)
         if owner_id:
             await message.reply("Please send the message you want to deliver.")
-            # Store an initial pending message entry with a placeholder text
             messages_collection.insert_one({
                 "sender_id": message.from_user.id,
                 "recipient_id": owner_id,
@@ -55,9 +54,10 @@ async def view_message(client, message: Message):
         for msg in unread_messages:
             sender_id = msg["sender_id"]
             message_text = msg["message_text"]
-            keyboard = InlineKeyboardMarkup([
-                [InlineKeyboardButton("پاسخ", callback_data=f"reply:{sender_id}"), InlineKeyboardButton("بلاک", callback_data=f"block:{sender_id}")]
-            ])
+            keyboard = InlineKeyboardMarkup([[
+                InlineKeyboardButton("پاسخ", callback_data=f"reply:{sender_id}"),
+                InlineKeyboardButton("بلاک", callback_data=f"block:{sender_id}")
+            ]])
             await message.reply(f"📬 New message:\n\n{message_text}", reply_markup=keyboard)
             messages_collection.update_one({"_id": msg["_id"]}, {"$set": {"status": "read"}})
     else:
@@ -71,13 +71,10 @@ async def receive_message(client, message: Message):
     if pending_msg:
         recipient_id = pending_msg["recipient_id"]
         
-        # Update the message text and mark it as unread for the recipient
         messages_collection.update_one({"_id": pending_msg["_id"]}, {"$set": {"message_text": message.text, "status": "unread"}})
         
-        # Notify the recipient of the new message
         await client.send_message(recipient_id, "📩 You have a new anonymous message! Click /newmsg to view it.")
         
-        # Confirm to sender that the message has been sent
         await message.reply("Your message has been sent!")
     else:
         await message.reply("Use /getlink to generate a link or click a valid link to send a message.")
@@ -99,4 +96,29 @@ async def handle_block(client, callback_query):
     messages_collection.delete_many({"recipient_id": callback_query.from_user.id, "sender_id": sender_id})
     await callback_query.message.reply("User has been blocked.")
 
+@app.on_message(filters.private)
+async def save_user_info(client, message: Message):
+    user_id = message.from_user.id
+    username = message.from_user.username if message.from_user.username else None
+    first_name = message.from_user.first_name if message.from_user.first_name else None
+    last_name = message.from_user.last_name if message.from_user.last_name else None
+
+    existing_user = users_collection.find_one({"user_id": user_id})
+    
+    if existing_user:
+        users_collection.update_one({"user_id": user_id}, {"$set": {
+            "username": username,
+            "first_name": first_name,
+            "last_name": last_name
+        }})
+    else:
+        users_collection.insert_one({
+            "user_id": user_id,
+            "username": username,
+            "first_name": first_name,
+            "last_name": last_name
+        })
+
+    print(f"User Info: {user_id}, Username: {username}, Name: {first_name} {last_name}")
+    
 app.run()
