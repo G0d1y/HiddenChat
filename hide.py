@@ -3,7 +3,6 @@ from pyrogram import Client, filters
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 from pymongo import MongoClient
 
-# Load configuration
 with open('config.json') as config_file:
     config = json.load(config_file)
 
@@ -16,7 +15,7 @@ app = Client("bot", api_id=api_id, api_hash=api_hash, bot_token=bot_token)
 mongo_client = MongoClient("mongodb+srv://mg:mani2244@cluster0.mmtvzb3.mongodb.net/")
 db = mongo_client["hidden_chat_db"]
 messages_collection = db["messages"]
-users_collection = db["users"]  # To store user info like username, name, and lastname
+users_collection = db["users"]
 
 bot_username = "HiddenChatIRtBot"
 
@@ -39,9 +38,9 @@ async def start(client, message: Message):
                 "recipient_id": owner_id,
                 "message_text": "",
                 "status": "pending",
-                "sender_username": message.from_user.username,  # Save sender's username
-                "sender_first_name": message.from_user.first_name,  # Save sender's first name
-                "sender_last_name": message.from_user.last_name  # Save sender's last name
+                "sender_username": message.from_user.username,
+                "sender_first_name": message.from_user.first_name,
+                "sender_last_name": message.from_user.last_name
             })
         else:
             await message.reply("Invalid or expired link.")
@@ -56,9 +55,9 @@ async def view_message(client, message: Message):
     if unread_messages:
         for msg in unread_messages:
             sender_id = msg["sender_id"]
-            sender_username = msg["sender_username"]  # Retrieve sender's username
-            sender_first_name = msg["sender_first_name"]  # Retrieve sender's first name
-            sender_last_name = msg["sender_last_name"]  # Retrieve sender's last name
+            sender_username = msg["sender_username"]
+            sender_first_name = msg["sender_first_name"]
+            sender_last_name = msg["sender_last_name"]
             message_text = msg["message_text"]
             keyboard = InlineKeyboardMarkup([[ 
                 InlineKeyboardButton("پاسخ", callback_data=f"reply:{sender_id}"),
@@ -69,9 +68,8 @@ async def view_message(client, message: Message):
             else:
                 await message.reply(f"{message_text}", reply_markup=keyboard)
             messages_collection.update_one({"_id": msg["_id"]}, {"$set": {"status": "read"}})
-
-            # Notify sender that the recipient has seen the message
-            await client.send_message(sender_id, "☝️ پیام شما توسط گیرنده دیده شد، در حال پاسخ به شماست!")
+            # Notify the sender that the recipient saw the message
+            await client.send_message(msg["sender_id"], "☝️ The recipient has seen your message!")
     else:
         await message.reply("No new messages.")
 
@@ -83,16 +81,14 @@ async def receive_message(client, message: Message):
     if pending_msg:
         recipient_id = pending_msg["recipient_id"]
         
-        # Save the message text and update status to unread, include sender info
         messages_collection.update_one({"_id": pending_msg["_id"]}, {"$set": {
             "message_text": message.text,
             "status": "unread",
-            "sender_username": message.from_user.username,  # Save sender's username
-            "sender_first_name": message.from_user.first_name,  # Save sender's first name
-            "sender_last_name": message.from_user.last_name  # Save sender's last name
+            "sender_username": message.from_user.username,
+            "sender_first_name": message.from_user.first_name,
+            "sender_last_name": message.from_user.last_name
         }})
-
-        # Notify the recipient
+        
         await client.send_message(recipient_id, "📩 You have a new anonymous message! Click /newmsg to view it.")
         
         await message.reply("پیام شما ارسال شد 😊\nچه کاری برات انجام بدم؟")
@@ -107,11 +103,13 @@ async def handle_reply(client, callback_query):
         "recipient_id": sender_id,
         "message_text": "",
         "status": "pending",
-        "sender_username": callback_query.from_user.username,  # Save sender's username
-        "sender_first_name": callback_query.from_user.first_name,  # Save sender's first name
-        "sender_last_name": callback_query.from_user.last_name  # Save sender's last name
+        "sender_username": callback_query.from_user.username,
+        "sender_first_name": callback_query.from_user.first_name,
+        "sender_last_name": callback_query.from_user.last_name
     })
-    await callback_query.message.reply("☝️ در حال پاسخ دادن به فرستنده این پیام هستی ... ؛ منتظریم بفرستی :)")
+    await callback_query.message.reply("Please type your reply.")
+
+    await callback_query.message.reply("☝️ در حال پاسخ دادن به فرستنده این پیام هستی ... ؛ منتظریم بفرستی :)")  # Updated message
 
 @app.on_callback_query(filters.regex("block"))
 async def handle_block(client, callback_query):
@@ -119,7 +117,6 @@ async def handle_block(client, callback_query):
     messages_collection.delete_many({"recipient_id": callback_query.from_user.id, "sender_id": sender_id})
     await callback_query.message.reply("User has been blocked.")
 
-# Save user's info (username, first_name, last_name)
 @app.on_message(filters.private)
 async def save_user_info(client, message: Message):
     user_id = message.from_user.id
@@ -127,18 +124,15 @@ async def save_user_info(client, message: Message):
     first_name = message.from_user.first_name if message.from_user.first_name else None
     last_name = message.from_user.last_name if message.from_user.last_name else None
 
-    # Check if the user already exists in the database
     existing_user = users_collection.find_one({"user_id": user_id})
     
     if existing_user:
-        # If user exists, update their info
         users_collection.update_one({"user_id": user_id}, {"$set": {
             "username": username,
             "first_name": first_name,
             "last_name": last_name
         }})
     else:
-        # If user doesn't exist, insert new user info
         users_collection.insert_one({
             "user_id": user_id,
             "username": username,
