@@ -32,7 +32,7 @@ async def start(client, message: Message):
         unique_code = message.command[1]
         owner_id = int(unique_code)
         if owner_id:
-            await message.reply("Please send the message you want to deliver.")
+            await message.reply("لطفا پیامی که میخواهید ارسال کنید رو وارد کنید.")
             messages_collection.insert_one({
                 "sender_id": message.from_user.id,
                 "recipient_id": owner_id,
@@ -43,9 +43,9 @@ async def start(client, message: Message):
                 "sender_last_name": message.from_user.last_name
             })
         else:
-            await message.reply("Invalid or expired link.")
+            await message.reply("لینک اشتباه است یا منقضی شده است.")
     else:
-        await message.reply("Welcome to the bot! Use /getlink to generate your unique link.")
+        await message.reply("برای ساختن لینک شخصی خود روی دستور /getlink کلیک کنید.")
 
 @app.on_message(filters.command("newmsg") & filters.private)
 async def view_message(client, message: Message):
@@ -69,7 +69,7 @@ async def view_message(client, message: Message):
                 await message.reply(f"{message_text}", reply_markup=keyboard)
             messages_collection.update_one({"_id": msg["_id"]}, {"$set": {"status": "read"}})
             # Notify the sender that the recipient saw the message
-            await client.send_message(msg["sender_id"], "☝️ The recipient has seen your message!")
+            await client.send_message(msg["sender_id"], "☝️ پیام شما توسط گیرنده دیده شد.")
     else:
         await message.reply("No new messages.")
 
@@ -89,11 +89,9 @@ async def receive_message(client, message: Message):
             "sender_last_name": message.from_user.last_name
         }})
         
-        await client.send_message(recipient_id, "📩 You have a new anonymous message! Click /newmsg to view it.")
+        await client.send_message(recipient_id, "📬 یه پیام ناشناس جدید داری ! \n\n جهت دریافت کلیک کنید 👈 /newmsg")
         
         await message.reply("پیام شما ارسال شد 😊\nچه کاری برات انجام بدم؟")
-    else:
-        await message.reply("Use /getlink to generate a link or click a valid link to send a message.")
 
 @app.on_callback_query(filters.regex("reply"))
 async def handle_reply(client, callback_query):
@@ -107,9 +105,7 @@ async def handle_reply(client, callback_query):
         "sender_first_name": callback_query.from_user.first_name,
         "sender_last_name": callback_query.from_user.last_name
     })
-    await callback_query.message.reply("Please type your reply.")
-
-    await callback_query.message.reply("☝️ در حال پاسخ دادن به فرستنده این پیام هستی ... ؛ منتظریم بفرستی :)")  # Updated message
+    await callback_query.message.reply("☝️ در حال پاسخ دادن به فرستنده این پیام هستی ... ؛ منتظریم بفرستی :)")
 
 @app.on_callback_query(filters.regex("block"))
 async def handle_block(client, callback_query):
@@ -140,6 +136,5 @@ async def save_user_info(client, message: Message):
             "last_name": last_name
         })
 
-    print(f"User Info: {user_id}, Username: {username}, Name: {first_name} {last_name}")
 
 app.run()
